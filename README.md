@@ -5,9 +5,15 @@
 
 般情况下只有一个App.cpp,不定期release。
 
-仅依赖：OpenCV 3.x 带contrib。
+仅依赖：OpenCV 3.x 带contrib
 
+tructured Forests for Fast Edge Detection
 
+https://www.microsoft.com/en-us/research/publication/structured-forests-for-fast-edge-detection/
+
+model文件：
+
+https://github.com/opencv/opencv_extra/blob/master/testdata/cv/ximgproc/model.yml.gz
 
 视频：
 
