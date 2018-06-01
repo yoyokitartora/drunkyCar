@@ -20,7 +20,7 @@ Mat SQI(Mat &src, Scalar param, int code = 'box', bool mul = true) {
 	}
 	return mul ? s.mul(s / b) : s / b;
 }
-nt main()
+int main()
 {
 	string path = "C:/Users/biche/OneDrive/ͼƬ/1/";
 	vector<Mat> frames;
