@@ -13,6 +13,6 @@
 
 https://youtu.be/-cr9FKWecgE
 
-ttps://youtu.be/2d_pJL0T6U0
+https://youtu.be/2d_pJL0T6U0
 
 https://www.bilibili.com/video/av24232013/
