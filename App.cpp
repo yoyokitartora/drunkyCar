@@ -20,13 +20,13 @@ Mat SQI(Mat &src, Scalar param, int code = 'box', bool mul = true) {
 	}
 	return mul ? s.mul(s / b) : s / b;
 }
-
-int main()
+nt main()
 {
 	string path = "C:/Users/biche/OneDrive/ͼƬ/1/";
 	vector<Mat> frames;
 	auto sed = ximgproc::createStructuredEdgeDetection("model.yml");
-	for (size_t i = 1; waitKey(1) != 27; i++) {
+	for (size_t i = 1; waitKey(1) != 27; i++) 
+	{
 		Mat frame = imread(path + to_string(i) + "_cam-image_array_.jpg");
 		if (frame.empty()) { i = 1; continue; }
 		devView(frame);
