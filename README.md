@@ -7,7 +7,7 @@
 
 仅依赖：OpenCV 3.x 带contrib
 
-tructured Forests for Fast Edge Detection
+Structured Forests for Fast Edge Detection
 
 https://www.microsoft.com/en-us/research/publication/structured-forests-for-fast-edge-detection/
 
