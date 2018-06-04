@@ -27,8 +27,17 @@
 
 3. Pipeline性能优化，处理时间属于10ms级别（i5-5300u单核@windows10）;
 
-4. 写了一个绘图函数用于装逼
-   ![](https://raw.githubusercontent.com/BICHENG/drunkyCar/master/demo_media/6-4-v0.1/roadseg5.png)
+4. 写了一个绘图函数用于装逼:
+
+![](https://raw.githubusercontent.com/BICHENG/drunkyCar/master/demo_media/6-4-v0.1/roadseg1.png)
+
+![](https://raw.githubusercontent.com/BICHENG/drunkyCar/master/demo_media/6-4-v0.1/roadseg2.png)
+
+![](https://raw.githubusercontent.com/BICHENG/drunkyCar/master/demo_media/6-4-v0.1/roadseg3.png)
+
+![](https://raw.githubusercontent.com/BICHENG/drunkyCar/master/demo_media/6-4-v0.1/roadseg4.png)
+
+![](https://raw.githubusercontent.com/BICHENG/drunkyCar/master/demo_media/6-4-v0.1/roadseg5.png)
 
 
 ## 参考
