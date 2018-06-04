@@ -1,78 +1,80 @@
+#include<windows.h>				// for windows
 #include<opencv2/opencv.hpp>
 #include<opencv2/ximgproc.hpp>
 using namespace std;
 using namespace cv;
 
-Mat SQI(Mat &src, Scalar param, int code = 'box', bool mul = true) {
-	Mat b, s;
-	src.copyTo(s);
-	switch (code)
-	{
-	case'box':
-		blur(src, b, Size(param[0], param[1]));
-		break;
-	case'guid':
-		ximgproc::guidedFilter(src, src, b, param[0], param[1]);
-		break;
-	default:
-		src.copyTo(b);
-		break;
-	}
-	return mul ? s.mul(s / b) : s / b;
+Mat SQI(Mat &src, Size ksize, bool mul = true) {
+	Mat s, b;
+	src.depth() == CV_8U ? src.convertTo(s, CV_32F, 1.0 / 255.0) : src.copyTo(s);
+	blur(s, b, ksize);
+	s = mul ? s.mul(s / b) : s / b;
+	if (src.depth() == CV_8U) convertScaleAbs(s, s, 255);
+	return s;
 }
+
+void demoview(Mat &frame, Mat &edgemap, Mat &bin, Mat &seg, Mat &bin_seg, vector<Point> &waypoints,string &message) {
+	Mat canvas = Mat::zeros(Size(frame.cols * 6, frame.rows), CV_8UC3), swap;
+	Rect roi(0, 0, frame.cols, frame.rows);
+	frame.copyTo(canvas(roi));
+	applyColorMap(255-edgemap, canvas(roi + Point(frame.cols, 0)), COLORMAP_BONE);
+	canvas(roi + Point(frame.cols * 2, 0)).setTo(Scalar(255, 255, 255), bin);
+	applyColorMap(seg, canvas(roi + Point(frame.cols * 3, 0)), COLORMAP_PARULA);
+	addWeighted(canvas(roi + Point(frame.cols * 3, 0)), 0.5, frame, 0.5, 0, canvas(roi + Point(frame.cols * 4, 0)));
+	swap = canvas(roi + Point(frame.cols * 4, 0));
+	for (size_t i = 1; i < waypoints.size(); i++) 
+		line(swap, waypoints[i - 1], waypoints[i], Scalar(255, 0, 255), 1, 16);
+	applyColorMap(bin_seg, canvas(roi + Point(frame.cols * 5, 0)), COLORMAP_SUMMER);
+	putText(canvas, message, Point(5, 115), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,0,0),2);
+	putText(canvas, message, Point(5, 115), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
+	imshow("costmap:roadseg", canvas);
+}
+
 int main()
 {
-	string path = "C:/Users/biche/OneDrive/ͼƬ/1/";
-	vector<Mat> frames;
+	SetProcessAffinityMask(GetCurrentProcess, 0x01);	// for windows
+	VideoCapture cam(1);
 	auto sed = ximgproc::createStructuredEdgeDetection("model.yml");
-	for (size_t i = 1; waitKey(1) != 27; i++) 
+	Mat frame; cam >> frame;
+	vector<Point> waypoints;
+	TickMeter perf_meter;
+	for (; waitKey(1) != 27; cam >> frame)
 	{
-		Mat frame = imread(path + to_string(i) + "_cam-image_array_.jpg");
-		if (frame.empty()) { i = 1; continue; }
-		devView(frame);
+		perf_meter.reset();
+		perf_meter.start();
+		resize(frame, frame, Size(160, 120),0,0, INTER_NEAREST);
 		Mat fframe,edgemap;
 		frame.convertTo(fframe, CV_32F, 1.0 / 255);
 		sed->detectEdges(fframe, edgemap);
-		convertScaleAbs(SQI(edgemap, Scalar(5, 1), 'box'), edgemap, 255.0);
-		rectangle(edgemap, Rect(0,0, edgemap.cols, edgemap.rows), Scalar(127), 11);
-		devView(edgemap);
+		convertScaleAbs(SQI(edgemap, Size(5, 1)), edgemap, 255.0);
+		rectangle(edgemap, Rect(0,0, edgemap.cols, edgemap.rows), Scalar(20), 11);
 		Mat bin;
-		threshold(edgemap, bin, 15, 255, THRESH_BINARY_INV);
-		int w = bin.cols / 100.0, x = bin.cols / 2 - w, y = bin.rows*0.55, h = bin.rows - y;
-		Rect search_roi = Rect(x, y, w, h);
+		threshold(edgemap, bin, 5, 255, THRESH_BINARY_INV);
+		int w = bin.cols / 100.0, x = bin.cols / 2 - w, y = bin.rows*0.75, h = bin.rows - y;
+		Rect search_roi = Rect(waypoints.empty() ? x : waypoints[waypoints.size() / 2].x, y, w, h);
 		rectangle(bin, search_roi, Scalar(255), -1);
 		vector<vector<Point>> contours;
-		findContours(bin, contours, RETR_EXTERNAL, RETR_LIST);
+		findContours(bin, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 		bin.setTo(0);
-		for (size_t i = 0; i < contours.size(); i++){
-			auto rect = boundingRect(contours[i]);
-			if (rect.contains(Point(edgemap.cols / 2, edgemap.rows*0.8))|| rect.contains(Point(edgemap.cols / 2, edgemap.rows*0.6)))
+		for (size_t i = 0; i < contours.size(); i++)
+			if (!(boundingRect(contours[i])&search_roi).empty()) 
 				drawContours(bin, contours, i, Scalar(255), -1);
-		}
-		findContours(bin, contours, RETR_EXTERNAL, RETR_LIST);
-		if (contours.empty()) {
-			cout << "can't find road at frame " << i << endl;
-			continue;
-		}
-		bin.setTo(0);
+		findContours(bin, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+		if (contours.empty()) continue;
 		vector<vector<Point>> road_hull(1);
 		for (size_t i = 0; i < contours.size(); i++)
 			convexHull(contours[i], road_hull[0]);
 		drawContours(bin, road_hull, 0, Scalar(255), -1);
-		devView(bin);
-		Mat mask,mask_seg;
-		ximgproc::guidedFilter(frame, bin, mask, 5, 1);
-		threshold(mask, mask_seg, 127, 255, THRESH_BINARY);
-		devView(mask);
-		vector<int> steer_q;
-		for (size_t i = mask_seg.rows *0.1; i < mask_seg.rows*0.9; i++){
-			auto rect = boundingRect(mask_seg.row(i));
+		Mat seg,bin_seg;
+		ximgproc::guidedFilter(frame, bin, seg, 5, 1);
+		threshold(seg, bin_seg, 127, 255, THRESH_BINARY);
+		waypoints.clear();
+		for (size_t i = bin_seg.rows *0.1; i < bin_seg.rows*0.9; i++){
+			auto rect = boundingRect(bin_seg.row(i));
 			if (rect.empty())continue;
-			circle(frame, Point(rect.x + rect.width / 2, i), 1, Scalar(255, 0, 255));
-			steer_q.push_back(rect.x + rect.width / 2);
+			waypoints.push_back(Point(rect.x + rect.width / 2, i));
 		}
-		cvtColor(mask, mask, COLOR_GRAY2BGR);
-		addWeighted(mask-(Scalar(127, 0, 255)), 0.5, frame, 1, 0, frame);
-		imshow("", frame);
+		perf_meter.stop();
+		demoview(frame, edgemap, bin, seg, bin_seg, waypoints, string("pipeline: ") + to_string((int)perf_meter.getTimeMilli()) + string(" ms"));
 	}
 } 
