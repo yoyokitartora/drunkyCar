@@ -70,9 +70,3 @@ https://www.bilibili.com/video/av24232013/
 ## Contribute | Donate
 
 若您觉得本项目有帮助或有改进的地方，请联系我
-
-<div align=center>
-
-![](https://raw.githubusercontent.com/BICHENG/drunkyCar/master/demo_media/WeChat.jpg)
-
-</div>
