@@ -1,4 +1,4 @@
-# drunkyCar 多快好省
+# drunkyCar 我变短了，也变强了（误）
 
 
 ## 核心思想:
