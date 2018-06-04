@@ -69,7 +69,7 @@ https://www.bilibili.com/video/av24232013/
 
 ## Contribute | Donate
 
-如果对您有帮助，不如我们一起搞事情
+若您觉得本项目有帮助或有改进的地方，请联系我
 
 <div align=center>
 
