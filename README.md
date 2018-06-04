@@ -13,7 +13,7 @@
 
 ## 如何使用：
 
-般情况下只有一个App.cpp,不定期release。
+一般情况下只有一个App.cpp,不定期release。
 
 仅依赖：OpenCV 3.x 带contrib
 
