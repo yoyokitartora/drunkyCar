@@ -71,5 +71,5 @@ https://www.bilibili.com/video/av24232013/
 
 如果对您有帮助，不如我们一起搞事情
 
-项目内含联系方式 :)
+![](https://raw.githubusercontent.com/BICHENG/drunkyCar/master/demo_media/WeChat.jpg)
 
