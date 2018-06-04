@@ -14,19 +14,19 @@ Mat SQI(Mat &src, Size ksize, bool mul = true) {
 }
 
 void demoview(Mat &frame, Mat &edgemap, Mat &bin, Mat &seg, Mat &bin_seg, vector<Point> &waypoints,string &message) {
-	Mat canvas = Mat::zeros(Size(frame.cols * 6, frame.rows), CV_8UC3), swap;
+	Mat canvas = Mat::zeros(Size(frame.cols * 3, frame.rows*2), CV_8UC3), swap;
 	Rect roi(0, 0, frame.cols, frame.rows);
 	frame.copyTo(canvas(roi));
 	applyColorMap(255-edgemap, canvas(roi + Point(frame.cols, 0)), COLORMAP_BONE);
 	canvas(roi + Point(frame.cols * 2, 0)).setTo(Scalar(255, 255, 255), bin);
-	applyColorMap(seg, canvas(roi + Point(frame.cols * 3, 0)), COLORMAP_PARULA);
-	addWeighted(canvas(roi + Point(frame.cols * 3, 0)), 0.5, frame, 0.5, 0, canvas(roi + Point(frame.cols * 4, 0)));
-	swap = canvas(roi + Point(frame.cols * 4, 0));
+	applyColorMap(seg, canvas(roi + Point(0, frame.rows)), COLORMAP_PARULA);
+	addWeighted(canvas(roi + Point(0, frame.rows)), 0.5, frame, 0.8, 0, canvas(roi + Point(frame.cols, frame.rows)));
+	swap = canvas(roi + Point(frame.cols, frame.rows));
 	for (size_t i = 1; i < waypoints.size(); i++) 
 		line(swap, waypoints[i - 1], waypoints[i], Scalar(255, 0, 255), 1, 16);
-	applyColorMap(bin_seg, canvas(roi + Point(frame.cols * 5, 0)), COLORMAP_SUMMER);
-	putText(canvas, message, Point(5, 115), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,0,0),2);
-	putText(canvas, message, Point(5, 115), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
+	applyColorMap(bin_seg, canvas(roi + Point(frame.cols * 2, frame.rows)), COLORMAP_SUMMER);
+	putText(canvas, message, Point(180, 160), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0,0,0),2);
+	putText(canvas, message, Point(180, 160), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
 	imshow("costmap:roadseg", canvas);
 }
 
